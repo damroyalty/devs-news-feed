@@ -26,4 +26,5 @@ replay_pid*
 # you don't need to know these hehehe
 *.css
 *.env
+*.html
 dist
