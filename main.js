@@ -2,7 +2,12 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
 const { app, BrowserWindow, ipcMain } = require('electron');
 const axios = require('axios');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+const fs = require('fs');
+const envPath = path.join(__dirname, '.env');
+
+
+
 
 // API Configuration
 const NEWS_API_CONFIG = {
@@ -35,8 +40,9 @@ const FMP_CONFIG = {
   const FALLBACK_IMAGE = 'https://preview.redd.it/where-is-uuh-from-does-anyone-know-the-origin-v0-bm1xva9aq59c1.gif';
   
   async function fetchFMPData(endpoint, params = {}) {
+    let url;
     try {
-      const url = typeof endpoint === 'function' ? endpoint(params) : endpoint;
+      url = typeof endpoint === 'function' ? endpoint(params) : endpoint;
       const { data } = await axios.get(url, { timeout: 5000 });
       return data;
     } catch (error) {

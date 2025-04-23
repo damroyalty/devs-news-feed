@@ -18,25 +18,37 @@
   "license": "MIT",
   "description": "A real-time news feed app for stock and earnings trading",
   "devDependencies": {
+    "dotenv-webpack": "^8.1.0",
     "electron": "^35.2.0",
     "electron-builder": "^26.0.12"
   },
-  "build": {
-    "appId": "com.yourname.newsfeed",
-    "productName": "Stock News Feed",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "**/*"
-    ],
-    "win": {
-      "target": "nsis",
-      "icon": "assets/cat-news.ico"
-    }
+ "build": {
+  "appId": "com.yourname.newsfeed",
+  "productName": "Stock News Feed",
+  "files": [
+    "**/*"
+  ],
+  "win": {
+    "target": "nsis",
+    "icon": "assets/cat-news.ico"
   },
-  "dependencies": {
-    "axios": "^1.8.4",
-    "dotenv": "^16.5.0"
+  "directories": {
+    "output": "dist"
+  },
+  "nsis": {
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Stock News Feed",
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerHeader": "assets/header.bmp",
+    "installerSidebar": "assets/sidebar.bmp",     
+    "uninstallerSidebar": "assets/uninstall.bmp" 
   }
+},
+"dependencies": {
+  "axios": "^1.8.4",
+  "dotenv": "^16.5.0"
 }
+}
+
