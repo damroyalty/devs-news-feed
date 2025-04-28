@@ -164,3 +164,103 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+ipcMain.handle('get-news-data', async (event, query = 'stocks OR market') => {
+  try {
+    const response = await axios.get('https://newsapi.org/v2/everything', {
+      params: {
+        q: query,
+        apiKey: process.env.NEWS_API_KEY,
+        language: 'en',
+        sortBy: 'publishedAt',
+        pageSize: 10
+      },
+      timeout: 5000
+    });
+
+    // Transform the response to include sentiment analysis
+    const articlesWithSentiment = response.data.articles.map(article => ({
+      ...article,
+      sentiment: analyzeSentiment(article.title),
+      source: article.source?.name || 'Unknown'
+    }));
+
+    return {
+      status: response.status,
+      articles: articlesWithSentiment
+    };
+  } catch (error) {
+    console.error('NewsAPI Error:', error.response?.data || error.message);
+    return {
+      error: {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status
+      },
+      articles: []
+    };
+  }
+});
+
+// Simple sentiment analysis helper
+function analyzeSentiment(text) {
+  const positive = ['up', 'rise', 'gain', 'bullish', 'beat', 'surge'];
+  const negative = ['down', 'fall', 'drop', 'bearish', 'miss', 'plunge'];
+  
+  const score = text.split(/\s+/).reduce((acc, word) => {
+    const lowerWord = word.toLowerCase();
+    if (positive.includes(lowerWord)) return acc + 1;
+    if (negative.includes(lowerWord)) return acc - 1;
+    return acc;
+  }, 0);
+
+  return score > 0 ? '📈' : score < 0 ? '📉' : '➖';
+}
+
+ipcMain.handle('search-news', async (event, query) => {
+  try {
+    const response = await axios.get('https://newsapi.org/v2/everything', {
+      params: {
+        q: query,
+        apiKey: process.env.NEWS_API_KEY,
+        language: 'en',
+        pageSize: 20
+      },
+      timeout: 10000
+    });
+
+    return {
+      status: 'success',
+      articles: response.data.articles.map(article => ({
+        title: article.title,
+        description: article.description,
+        url: article.url,
+        urlToImage: article.urlToImage,
+        publishedAt: article.publishedAt,
+        source: article.source?.name || 'Unknown',
+        sentiment: analyzeSentiment(article.title)
+      }))
+    };
+  } catch (error) {
+    console.error('Search Error:', error.message);
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message,
+      articles: []
+    };
+  }
+});
+
+function analyzeSentiment(text) {
+  const positive = ['up', 'rise', 'gain', 'bullish', 'beat', 'surge'];
+  const negative = ['down', 'fall', 'drop', 'bearish', 'miss', 'plunge'];
+  
+  const score = text.toLowerCase().split(/\s+/).reduce((acc, word) => {
+    if (positive.includes(word)) return acc + 1;
+    if (negative.includes(word)) return acc - 1;
+    return acc;
+  }, 0);
+  
+  return score > 0 ? '📈' : score < 0 ? '📉' : '➖';
+}
+
