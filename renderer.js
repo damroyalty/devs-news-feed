@@ -113,3 +113,204 @@ document.addEventListener('DOMContentLoaded', async () => {
     const refreshInterval = setInterval(fetchNews, REFRESH_MS);
     window.addEventListener('unload', () => clearInterval(refreshInterval));
 });
+
+// Add to renderer.js for client-side analysis
+function analyzeSentiment(headline) {
+    const positive = ['up', 'rise', 'gain', 'bullish'];
+    const negative = ['down', 'fall', 'drop', 'bearish'];
+    
+    let score = 0;
+    const words = headline.toLowerCase().split(/\s+/);
+    words.forEach(word => {
+      if (positive.includes(word)) score++;
+      if (negative.includes(word)) score--;
+    });
+    
+    return score > 0 ? '📈' : score < 0 ? '📉' : '➖';
+  }
+  
+  // Apply to each article title
+  contentDiv.innerHTML += `<span class="sentiment">${analyzeSentiment(article.title)}</span>`;
+
+  function analyzeSentiment(headline) {
+    // More sophisticated analysis can be implemented here
+    const positive = ['up', 'rise', 'gain', 'bullish'];
+    const negative = ['down', 'fall', 'drop', 'bearish'];
+    
+    let score = 0;
+    const words = headline.toLowerCase().split(/\s+/);
+    words.forEach(word => {
+      if (positive.includes(word)) score++;
+      if (negative.includes(word)) score--;
+    });
+    
+    return score > 0 ? '📈' : score < 0 ? '📉' : '➖';
+  }
+  
+  async function displayEarnings() {
+    const earningsData = await fetchEarningsCalendar();
+    const earningsList = document.getElementById('earnings-list');
+    earningsData.forEach(earn => {
+      const listItem = document.createElement('li');
+      listItem.innerHTML = `${earn.symbol} - ${earn.earningsDate}`;
+      earningsList.appendChild(listItem);
+    });
+  }
+  
+
+function createHeadlineTicker(newsItems) {
+    const ticker = document.querySelector('.headline-scroll');
+    if (!ticker) return;
+    
+    ticker.innerHTML = '';
+    
+    // for financial headlines 
+    const financialKeywords = ['stock', 'stocks', 'market', 'dow', 'nasdaq', 's&p', 
+                             'earnings', 'profit', 'revenue', 'investment', 'share'];
+    
+    const financialNews = newsItems.filter(item => 
+      financialKeywords.some(keyword => 
+        item.title.toLowerCase().includes(keyword.toLowerCase())
+      )
+    );
+    
+    // ticker items
+    financialNews.forEach(item => {
+      const sentiment = analyzeSentiment(item.title);
+      const tickerItem = document.createElement('span');
+      tickerItem.className = 'headline-item';
+      
+      tickerItem.innerHTML = `
+        <span class="${sentiment === '📈' ? 'positive' : sentiment === '📉' ? 'negative' : ''}">
+          ${sentiment} ${item.title} 
+        </span>
+        <span style="color: #82dce2; margin: 0 10px;">|</span>
+      `;
+      
+      ticker.appendChild(tickerItem);
+    });
+    
+    // Add some empty space at the end
+    const spacer = document.createElement('span');
+    spacer.className = 'headline-item';
+    spacer.innerHTML = '•••';
+    ticker.appendChild(spacer.cloneNode());
+    ticker.appendChild(spacer.cloneNode());
+  }
+  
+  async function fetchNews() {
+    try {
+      updateTimestamp();
+      const data = await window.api.getNews();
+      
+      if (!feed) return;
+      feed.innerHTML = '';
+      
+      if (data.error) {
+        feed.innerHTML = `<li>Error: ${data.error}</li>`;
+        return;
+      }
+  
+      createHeadlineTicker(data.articles);
+  
+    
+      const fragment = document.createDocumentFragment();
+      
+    
+      
+      feed.appendChild(fragment);
+      updateTimestamp();
+    } catch (err) {
+      console.error('Error fetching news:', err);
+      feed.innerHTML = `<li>Error: ${err.message}</li>`;
+    }
+  }
+  
+ 
+  function analyzeSentiment(headline) {
+    const positive = ['up', 'rise', 'gain', 'bullish', 'beat', 'surge', 'high', 'increase'];
+    const negative = ['down', 'fall', 'drop', 'bearish', 'miss', 'plunge', 'low', 'decrease'];
+    
+    let score = 0;
+    const words = headline.toLowerCase().split(/\s+/);
+    
+    words.forEach(word => {
+      if (positive.includes(word)) score++;
+      if (negative.includes(word)) score--;
+    });
+    
+    return score > 0 ? '📈' : score < 0 ? '📉' : '➖';
+  }
+
+
+ document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('news-search');
+    const searchButton = document.getElementById('search-button');
+  
+    // Search function
+    const performSearch = async () => {
+      const query = searchInput.value.trim();
+      if (!query) {
+        await loadDefaultNews();
+        return;
+      }
+  
+      searchButton.innerHTML = '<div class="spinner"></div>';
+      searchButton.disabled = true;
+  
+      try {
+        const result = await window.api.searchNews(query);
+        
+        if (result.status === 'success' && result.articles.length > 0) {
+          displayNews(result.articles);
+        } else {
+          feed.innerHTML = `<li class="error">${result.message || 'No articles found'}</li>`;
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        feed.innerHTML = `<li class="error">Search failed: ${error.message}</li>`;
+      } finally {
+        searchButton.innerHTML = '🔍';
+        searchButton.disabled = false;
+      }
+    };
+  
+    const displayNews = (articles) => {
+      feed.innerHTML = '';
+  
+      articles.forEach(article => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${article.urlToImage || FALLBACK_IMAGE}" alt="${article.title}">
+          <div>
+            <strong>${article.title}</strong>
+            <em>${article.source} • ${formatDate(article.publishedAt)}</em>
+            <p>${article.description || ''}</p>
+            <a href="${article.url}" target="_blank" rel="noopener">Read more</a>
+            <span class="sentiment">${article.sentiment}</span>
+          </div>
+        `;
+        feed.appendChild(li);
+      });
+    };
+  
+    const formatDate = (dateString) => {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    };
+  
+    const loadDefaultNews = async () => {
+      const result = await window.api.getNews();
+      displayNews(result.articles || []);
+    };
+  
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') performSearch();
+    });
+  
+    loadDefaultNews();
+  });
