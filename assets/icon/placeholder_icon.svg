@@ -1,0 +1,29 @@
+<!-- This is a placeholder SVG that creates a simple icon -->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00BCD4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7B1FA2;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="512" cy="512" r="480" fill="url(#grad1)" stroke="#ffffff" stroke-width="8"/>
+  
+  <!-- News icon -->
+  <rect x="256" y="300" width="512" height="350" rx="24" fill="#ffffff" opacity="0.9"/>
+  <rect x="280" y="324" width="200" height="24" rx="4" fill="#00BCD4"/>
+  <rect x="280" y="364" width="464" height="16" rx="2" fill="#666666"/>
+  <rect x="280" y="390" width="464" height="16" rx="2" fill="#666666"/>
+  <rect x="280" y="416" width="300" height="16" rx="2" fill="#666666"/>
+  
+  <!-- Stock chart icon -->
+  <path d="M 280 480 L 320 460 L 360 500 L 400 440 L 440 470 L 480 420" stroke="#7B1FA2" stroke-width="6" fill="none"/>
+  
+  <!-- Dollar sign -->
+  <text x="600" y="520" font-family="Arial" font-size="120" font-weight="bold" fill="#00BCD4">$</text>
+  
+  <!-- Title at bottom -->
+  <text x="512" y="750" font-family="Arial" font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">FinanceFlow</text>
+</svg>
